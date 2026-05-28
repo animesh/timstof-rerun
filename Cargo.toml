@@ -1,0 +1,42 @@
+[package]
+name        = "timstof-rerun"
+version     = "0.1.0"
+edition     = "2021"
+description = "timsTOF raw data viewer: rustdf (rustims) -> Rerun, no SDK required"
+license     = "MIT"
+readme      = "README.md"
+repository  = "https://github.com/animesh/timstof-rerun"
+keywords    = ["proteomics", "mass-spectrometry", "timsTOF", "rerun", "visualization"]
+categories  = ["science", "visualization"]
+
+[[bin]]
+name = "timstof-rerun"
+path = "src/main.rs"
+
+[dependencies]
+# rustdf is the TDF I/O crate from the rustims monorepo (no Bruker SDK)
+rustdf     = "0.4"
+
+# Rerun Rust SDK - matches Python SDK 0.22.x
+rerun      = { version = "0.22", features = ["sdk"] }
+
+# SQLite for chromatography-data.sqlite and analysis.tdf metadata
+rusqlite   = { version = "0.32", features = ["bundled"] }
+
+# CLI
+clap       = { version = "4", features = ["derive"] }
+
+# Parallel frame processing
+rayon      = "1"
+
+# Logging
+log        = "0.4"
+env_logger = "0.11"
+
+# Error handling
+anyhow     = "1"
+
+[profile.release]
+opt-level = 3
+lto       = true
+codegen-units = 1
