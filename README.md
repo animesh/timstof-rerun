@@ -4,11 +4,7 @@
 
 
 ![Live viewer screenshot](Screenshot.png)
-5D ion map in Rerun
-
-- corrected `SeriesLines::with_colors` to use RGB tuples
-- corrected `SeriesLines::with_widths` to use an iterable width list
-- verified `cargo build --release` with the explicit cargo executable path
+5D ion map in Rerun for https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/06/PXD045439/230317_SIGRID_10_Slot1-41_1_4086.d.tar
 
 ```
 RT         -> Rerun timeline  (drag scrubber to animate)
@@ -73,15 +69,42 @@ cargo build --release
 # Binary: ./target/release/timstof-rerun
 ```
 
-### Quick install
+### Quick Run on [230317_SIGRID_10_Slot1-41_1_4086.d](https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/06/PXD045439/230317_SIGRID_10_Slot1-41_1_4086.d.tar)
 
 ```bash
-cargo install --path .
+wget https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/06/PXD045439/230317_SIGRID_10_Slot1-41_1_4086.d.tar
+tar xvf 230317_SIGRID_10_Slot1-41_1_4086.d.tar
 ```
 
-## Usage
+```
+.\target\release\timstof-rerun rerun 230317_SIGRID_10_Slot1-41_1_4086.d 
+[2026-05-30T13:39:47Z INFO  timstof_rerun] Streaming to Rerun: 230317_SIGRID_10_Slot1-41_1_4086.d
+[2026-05-30T13:39:47Z INFO  timstof_rerun::rerun_view] Spawning Rerun viewer
+2026-05-30T13:39:48.707754Z  INFO re_perf_telemetry::telemetry: Telemetry initialized enabled=false service=rerun trace_mode="off" traces=off logs=off metrics=off tracy=false
+Warning: Could not derive m/z calibration from SDK. Using simple boundary model which may have ~5 Da error on some datasets. This typically happens on macOS where Bruker SDK is not available.
+[2026-05-30T13:39:48Z INFO  timstof_rerun::rerun_view] 66477 frames in 230317_SIGRID_10_Slot1-41_1_4086.d
+[2026-05-30T13:39:49Z INFO  timstof_rerun::rerun_view]   chromatogram/BPC : 9970 points
+[2026-05-30T13:39:49Z INFO  timstof_rerun::rerun_view]   chromatogram/TIC : 56500 points
+[2026-05-30T13:39:49Z INFO  timstof_rerun::rerun_view]   MS2 markers: 56501 frames
+2026-05-30T13:39:49.580982Z  WARN egui_wgpu::winit: Transparent window was requested, but the active wgpu surface does not support a `CompositeAlphaMode` with transparency.
+2026-05-30T13:39:49.709446Z  INFO re_grpc_server: Listening for gRPC connections on 0.0.0.0:9876. Connect by running `rerun --connect rerun+http://127.0.0.1:9876/proxy`
+[2026-05-30T13:41:51Z INFO  timstof_rerun::rerun_view] Streaming 2000 / 9976 MS1 frames  top_n=2000
+[2026-05-30T13:41:55Z INFO  timstof_rerun::rerun_view]   200 frames...
+[2026-05-30T13:42:00Z INFO  timstof_rerun::rerun_view]   400 frames...
+[2026-05-30T13:42:05Z INFO  timstof_rerun::rerun_view]   600 frames...
+[2026-05-30T13:42:11Z INFO  timstof_rerun::rerun_view]   800 frames...
+[2026-05-30T13:42:18Z INFO  timstof_rerun::rerun_view]   1000 frames...
+[2026-05-30T13:42:26Z INFO  timstof_rerun::rerun_view]   1200 frames...
+[2026-05-30T13:42:33Z INFO  timstof_rerun::rerun_view]   1400 frames...
+[2026-05-30T13:42:42Z INFO  timstof_rerun::rerun_view]   1600 frames...
+[2026-05-30T13:42:51Z INFO  timstof_rerun::rerun_view]   1800 frames...
+[2026-05-30T13:42:59Z INFO  timstof_rerun::rerun_view]   2000 frames...
+[2026-05-30T13:42:59Z INFO  timstof_rerun::rerun_view] Done. 2000 frames.
+[2026-05-30T13:42:59Z INFO  timstof_rerun::rerun_view] Viewer running - drag the RT scrubber to a BPC peak (30-60 min)
+[2026-05-30T13:42:59Z INFO  timstof_rerun::rerun_view] The ion_map, frame_heatmap, mobilogram, spectrum all update automatically.
+```
 
-### Live 5D viewer
+## General Usage
 
 ```bash
 # Stream to live Rerun viewer (spawns viewer automatically)
