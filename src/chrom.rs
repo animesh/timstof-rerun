@@ -11,7 +11,6 @@
 
 use anyhow::{Context, Result};
 use rusqlite::{Connection, OpenFlags};
-use std::io::Read;
 use std::path::{Path, PathBuf};
 
 pub struct TraceInfo {
@@ -158,4 +157,39 @@ pub fn run(d_path: &Path, out_dir: Option<&Path>) -> Result<()> {
     }
     println!("\nOutput: {}", out.display());
     Ok(())
+}
+
+/// Find a trace by description substring (case-insensitive) and read its data.
+/// Returns Ok(None) if no matching trace found or trace has no data.
+pub fn read_chrom_trace_by_desc(
+    db_path: &Path,
+    desc_fragment: &str,
+) -> anyhow::Result<Option<(Vec<f64>, Vec<f32>)>> {
+    use rusqlite::{Connection, OpenFlags};
+    let conn = Connection::open_with_flags(db_path, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+
+    // Find the trace ID whose description contains desc_fragment
+    // Prefer MS trace (Instrument like "timsTOF") over HPLC traces
+    let mut stmt = conn.prepare(
+        "SELECT ts.Id FROM TraceSources ts \
+         WHERE UPPER(ts.Description) LIKE UPPER(?1) \
+         AND EXISTS (SELECT 1 FROM TraceChunks tc WHERE tc.Trace = ts.Id) \
+         ORDER BY \
+           CASE WHEN UPPER(ts.Instrument) LIKE '%TIMS%' THEN 0 ELSE 1 END, \
+           ts.Id \
+         LIMIT 1"
+    )?;
+    let pattern = format!("%{}%", desc_fragment);
+    let trace_id: Option<u32> = stmt
+        .query_map([&pattern], |row| row.get::<_, u32>(0))?
+        .next()
+        .transpose()?;
+
+    match trace_id {
+        None => Ok(None),
+        Some(tid) => {
+            let result = read_chrom_trace(db_path, tid)?;
+            if result.0.is_empty() { Ok(None) } else { Ok(Some(result)) }
+        }
+    }
 }

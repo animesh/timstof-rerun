@@ -8,11 +8,31 @@ use rusqlite::{Connection, OpenFlags, types::ValueRef};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+/// Format a float in "shortest useful" form:
+/// integers print without decimal, small/large values use scientific notation.
+fn fmt_float(f: f64) -> String {
+    if f == 0.0 {
+        return "0".to_string();
+    }
+    let abs = f.abs();
+    // Use scientific notation for very small or very large values
+    if abs < 1e-4 || abs >= 1e10 {
+        format!("{:.6e}", f)
+    } else {
+        // Use enough decimal places to be useful
+        let s = format!("{:.10}", f);
+        // Strip trailing zeros after decimal point
+        let s = s.trim_end_matches('0');
+        let s = s.trim_end_matches('.');
+        s.to_string()
+    }
+}
+
 fn cell_to_string(v: ValueRef) -> String {
     match v {
         ValueRef::Null        => String::new(),
         ValueRef::Integer(i)  => i.to_string(),
-        ValueRef::Real(f)     => format!("{:.10g}", f),
+        ValueRef::Real(f)     => fmt_float(f),
         ValueRef::Text(s)     => String::from_utf8_lossy(s).to_string(),
         ValueRef::Blob(b)     => format!("[BLOB {} bytes]", b.len()),
     }
@@ -27,7 +47,6 @@ pub fn run(d_path: &Path, out_dir: Option<&Path>) -> Result<()> {
 
     let conn = Connection::open_with_flags(&tdf, OpenFlags::SQLITE_OPEN_READ_ONLY)?;
 
-    // Enumerate tables and views
     let mut stmt = conn.prepare(
         "SELECT name, type FROM sqlite_master \
          WHERE type IN ('table','view') ORDER BY type DESC, name",
@@ -47,13 +66,11 @@ pub fn run(d_path: &Path, out_dir: Option<&Path>) -> Result<()> {
         let ncols = stmt.column_count();
         if ncols == 0 { continue; }
 
-        // Header
         let header: Vec<String> = (0..ncols)
             .map(|i| stmt.column_name(i).unwrap_or("?").to_string())
             .collect();
         writeln!(f, "{}", header.join("\t"))?;
 
-        // Rows
         let mut nrows = 0i64;
         let mut rows = stmt.query([])?;
         while let Some(row) = rows.next()? {

@@ -2,6 +2,23 @@
 
 **timsTOF 5D raw data viewer**
 
+
+![Live viewer screenshot](Screenshot.png)
+5D ion map in Rerun
+
+- corrected `SeriesLines::with_colors` to use RGB tuples
+- corrected `SeriesLines::with_widths` to use an iterable width list
+- verified `cargo build --release` with the explicit cargo executable path
+
+```
+RT         -> Rerun timeline  (drag scrubber to animate)
+m/z        -> X axis of frame heatmap  (200-1700 Da)
+1/K0       -> Y axis of frame heatmap  (0.60-1.80 Vs/cm²)
+Intensity  -> pixel colour  (plasma LUT, log-scaled, black=0)
+MS type    -> separate BPC/TIC entities
+```
+
+
 Reads Bruker timsTOF `.d` directories using
 [rustdf](https://github.com/theGreatHerrLebert/rustims) (from the rustims framework,
 [Teschner et al., J. Proteome Res. 2025](https://pubs.acs.org/doi/10.1021/acs.jproteome.4c00966))
@@ -34,15 +51,6 @@ and streams data directly to the [Rerun](https://rerun.io) viewer.
 > recalibration state is not available without the SDK - mass accuracy may
 > differ by <1 ppm.
 
-## 5D ion map in Rerun
-
-```
-RT         -> Rerun timeline  (drag scrubber to animate)
-m/z        -> X axis of frame heatmap  (200-1700 Da)
-1/K0       -> Y axis of frame heatmap  (0.60-1.80 Vs/cm²)
-Intensity  -> pixel colour  (plasma LUT, log-scaled, black=0)
-MS type    -> separate BPC/TIC entities
-```
 
 ## Installation
 
